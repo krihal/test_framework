@@ -28,6 +28,8 @@ class PyTest():
                 continue
             self.run_test(obj)
         self.run_test(self.test_terminate)
+        print "\nTest done. %d cases out of %d failed and %d passed." % \
+            (self.failed, self.cases, self.passed)
 
     def run_test(self, test):
         try:    
@@ -41,10 +43,6 @@ class PyTest():
         except TestFail, e:
             print "Test FAILED: %s" % e
             self.failed += 1
-        except TestDone, e:
-            self.passed += 1
-            print "\nTest done. %d cases out of %d failed and %d passed." % \
-                (self.failed, self.cases, self.passed)
         except Exception, e:
             print "Test failed wih unknown error: %s" % e
             self.failed += 1
