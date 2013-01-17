@@ -16,9 +16,6 @@ class TestFail(Exception):
 class TestDone(Exception):
     pass
 
-class TestTimeout(Exception):
-    pass
-
 class PyTest():
     def __init__(self):
         self.passed = 0
@@ -55,7 +52,8 @@ class PyTest():
 def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
     def decorator(func):
         def __handle_timeout__(signum, frame):
-            raise TestTimeout(error_message)
+            raise TestFail("%s timed out after %d seconds" % \
+                               (func.__name__, seconds))
 
         def wrapper(*args, **kwargs):
             signal.signal(signal.SIGALRM, __handle_timeout__)
@@ -64,6 +62,5 @@ def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
                 func(*args, **kwargs)
             finally:
                 signal.alarm(0)
-                raise TestFail("%s timed out after %d seconds" % (func.__name__, seconds))
         return wraps(func)(wrapper)
     return decorator
