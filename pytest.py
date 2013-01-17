@@ -1,6 +1,11 @@
+import os
 import re
 import sys
+import errno
+import signal
 import inspect
+
+from functools import wraps
 
 class TestPass(Exception):
     pass
@@ -9,6 +14,9 @@ class TestFail(Exception):
     pass
 
 class TestDone(Exception):
+    pass
+
+class TestTimeout(Exception):
     pass
 
 class PyTest():
@@ -44,3 +52,18 @@ class PyTest():
             print "Test failed wih unknown error: %s" % e
             self.failed += 1
     
+def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
+    def decorator(func):
+        def __handle_timeout__(signum, frame):
+            raise TestTimeout(error_message)
+
+        def wrapper(*args, **kwargs):
+            signal.signal(signal.SIGALRM, __handle_timeout__)
+            signal.alarm(seconds)
+            try:
+                func(*args, **kwargs)
+            finally:
+                signal.alarm(0)
+                raise TestFail("%s timed out after %d seconds" % (func.__name__, seconds))
+        return wraps(func)(wrapper)
+    return decorator

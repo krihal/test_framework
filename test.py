@@ -1,3 +1,4 @@
+from time import sleep
 from pytest import *
 
 class Test(PyTest):
@@ -21,8 +22,10 @@ class Test(PyTest):
         # Do stuff here
         raise TestPass("test_3")
 
+    # This case will time out after 2 seconds
+    @timeout(2)
     def test_4(self):
-        # Do stuff here
+        sleep(10)
         raise TestPass("test_4")
 
 
